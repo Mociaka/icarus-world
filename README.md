@@ -43,20 +43,33 @@ git push -u origin main
 
 Створи файл icarus.ps1 (можна зберігати де зручно):
 
+# ===== PATHS =====
 $prospectsPath = "C:\Users\user\AppData\Local\Icarus\Saved\PlayerData\76561199354886998\Prospects"
 $icarusExe = "D:\GAMES_D\steamapps\common\Icarus\Icarus.exe"
 
+# ===== PULL BEFORE GAME =====
+Write-Host "Pulling Prospects from Git..."
 Set-Location $prospectsPath
 git pull
 
+# ===== START GAME =====
+Write-Host "Starting Icarus..."
 $proc = Start-Process -FilePath $icarusExe -PassThru
+
+# ===== WAIT FOR GAME CLOSE =====
 Wait-Process -Id $proc.Id
 
+# ===== PUSH AFTER GAME =====
+Write-Host "Game closed. Saving world..."
 git add .
 if (-not (git diff --cached --quiet)) {
     git commit -m "Auto save: $(Get-Date -Format 'yyyy-MM-dd HH:mm')"
     git push
+} else {
+    Write-Host "No changes to commit."
 }
+
+Write-Host "Done."
 
 4. Дозвіл на запуск скриптів (один раз)
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
